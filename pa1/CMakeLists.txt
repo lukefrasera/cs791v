@@ -7,6 +7,6 @@ include_directories(
 
 cuda_add_executable( hellocuda
   src/hellocuda.cu
-  add.h
-  add.cu
+  src/add.h
+  src/add.cu
 )
