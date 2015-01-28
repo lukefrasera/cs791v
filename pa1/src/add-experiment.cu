@@ -1,4 +1,4 @@
-//"addexperiment.cu"
+// "addexperiment.cu"
 //
 //  Copyright (c) Luke Fraser 2015
 //
@@ -32,27 +32,27 @@ int main(int argc, char const *argv[]) {
   // Process input parameters
   while ((c = getopt(argc, argv, "st:b:c")) != -1) {
     switch (c) {
-      case 's': // Striding option
+      case 's':  // Striding option
         stride = true;
         break;
-      case 't': // thread number
+      case 't':  // thread number
         threads = atoi(optarg);
         break;
-      case 'b': // block number
+      case 'b':  // block number
         blocks = atoi(optarg);
         break;
-      case 'c': // CPU comute
+      case 'c':  // CPU comute
         cpu = true;
         break;
       default:
-        printf ("?? getopt returned character code 0%o ??\n", c);
+        printf("?? getopt returned character code 0%o ??\n", c);
     }
   }
   if (optind < argc) {
-    printf ("non-option ARGV-elements: ");
+    printf("non-option ARGV-elements: ");
     while (optind < argc)
-      printf ("%s ", argv[optind++]);
-    printf ("\n");
+      printf("%s ", argv[optind++]);
+    printf("\n");
   }
 
   // Allocate adding vectors
