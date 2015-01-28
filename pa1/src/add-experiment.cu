@@ -23,7 +23,7 @@
 
 #include "add.h"
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char *const argv[]) {
   // geopt variables
   int c;
   bool stride = false, cpu = false;
@@ -56,6 +56,6 @@ int main(int argc, char const *argv[]) {
   }
 
   // Allocate adding vectors
-  int *a, *b, *c;
+  // int *a, *b, *c;
   return 0;
 }
