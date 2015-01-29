@@ -20,18 +20,22 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <time.h>
+#include <math.h>
 
 #include "add.h"
 
+void CudaMallocErrorCheck(void** ptr, int size);
+
 int main(int argc, char *const argv[]) {
   // geopt variables
-  int c;
+  int c_;
   bool stride = false, cpu = false;
-  int threads = 1, blocks = 1;
+  int threads = 1, blocks = 1, N;
 
   // Process input parameters
-  while ((c = getopt(argc, argv, "st:b:c")) != -1) {
-    switch (c) {
+  while ((c_ = getopt(argc, argv, "st:b:cn:")) != -1) {
+    switch (c_) {
       case 's':  // Striding option
         stride = true;
         break;
@@ -44,8 +48,11 @@ int main(int argc, char *const argv[]) {
       case 'c':  // CPU comute
         cpu = true;
         break;
+      case 'n':
+        N = atoi(optarg);
+        break;
       default:
-        printf("?? getopt returned character code 0%o ??\n", c);
+        printf("?? getopt returned character code 0%o ??\n", c_);
     }
   }
   if (optind < argc) {
@@ -56,6 +63,99 @@ int main(int argc, char *const argv[]) {
   }
 
   // Allocate adding vectors
-  // int *a, *b, *c;
+  int *a, *b, *c;
+  int *dev_a, *dev_b, *dev_c;
+  int element_per_thread = ceil((float)N/(float)blocks/(float)threads);
+  int size = blocks * threads * element_per_thread;
+
+  a = new int[size];
+  b = new int[size];
+  c = new int[size];
+
+  // Fill host arrays
+  for (int i = 0; i < size; ++i) {
+    a[i] = i;
+    b[i] = i;
+  }
+
+  // Check if CPU computation requested
+  // time_t cstart, cend;
+  cudaEvent_t start, end;
+  cudaEventCreate(&start);
+  cudaEventCreate(&end);
+  float elapsedTime;
+
+  printf("Elements: %d\n", N);
+  if (cpu) {
+    cudaEventRecord(start, 0);
+    for (int i = 0; i < N; ++i) {
+      c[i] = a[i] + b[i];
+    }
+    cudaEventRecord(end, 0);
+    cudaEventElapsedTime(&elapsedTime, start, end);
+    printf("Elapsed Sequenctial Time: %f\n", elapsedTime);
+    return 0;
+  }
+
+  // Allocate Cuda memory
+  CudaMallocErrorCheck( (void**) &dev_a, size * sizeof(int));
+  CudaMallocErrorCheck( (void**) &dev_b, size * sizeof(int));
+  CudaMallocErrorCheck( (void**) &dev_c, size * sizeof(int));
+
+  // Create event timers
+
+  cudaEventRecord(start, 0);
+
+  cudaMemcpy(dev_a, a, N * sizeof(int), cudaMemcpyHostToDevice);
+  cudaMemcpy(dev_b, b, N * sizeof(int), cudaMemcpyHostToDevice);
+
+  // Perform Gpu Computation
+  if (stride) {
+    add_stride<<<blocks, threads>>>(dev_a, dev_b, dev_c, element_per_thread);
+  } else {
+    add_no_stride<<<blocks, threads>>>(dev_a, dev_b, dev_c, element_per_thread);
+  }
+
+  cudaMemcpy(c, dev_c, N * sizeof(int), cudaMemcpyDeviceToHost);
+
+  cudaEventRecord(end, 0);
+  cudaEventSynchronize(end);
+
+  cudaEventElapsedTime(&elapsedTime, start, end);
+
+  // Check GPU values
+  for (int i = 0; i < N; ++i) {
+    if (c[i] != a[i] + b[i]) {
+      printf("Element: %d\n", i);
+      printf("Oh no! Something went wrong.\n");
+
+      // clean up events - we should check for error codes here.
+      cudaEventDestroy(start);
+      cudaEventDestroy(end);
+
+      cudaFree(dev_a);
+      cudaFree(dev_b);
+      cudaFree(dev_c);
+      exit(1);
+    }
+  }
+
+  printf("Your program took: %f ms.\n", elapsedTime);
+
+  cudaEventDestroy(start);
+  cudaEventDestroy(end);
+
+  cudaFree(dev_a);
+  cudaFree(dev_b);
+  cudaFree(dev_c);
+
   return 0;
+}
+
+void CudaMallocErrorCheck(void** ptr, int size) {
+  cudaError_t err = cudaMalloc(ptr, size);
+  if (err != cudaSuccess) {
+    printf("Error: %s", cudaGetErrorString(err));
+    exit(1);
+  }
 }

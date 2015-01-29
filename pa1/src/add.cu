@@ -9,28 +9,16 @@
   pointers we pass in should point to memory on the device, but this
   is not indicated by the function's signature.
  */
-__global__ void add(int *a, int *b, int *c) {
+__global__ void add_no_stride(int *a, int *b, int *c, int elements_per_thread) {
+  int offset = blockIdx.x * blockDim.x * elements_per_thread + threadIdx.x * elements_per_thread;
+  for (int i = 0; i < elements_per_thread; ++i) {
+    c[offset + i] = a[offset + i] + b[offset + i];
+  }
+}
 
-  /*
-    Each thread knows its identity in the system. This identity is
-    made available in code via indices blockIdx and threadIdx. We
-    write blockIdx.x because block indices are multidimensional. In
-    this case, we have linear arrays of data, so we only need one
-    dimension. If this doesn't make sense, don't worry - the important
-    thing is that the first step in the function is converting the
-    thread's indentity into an index into the data.
-   */
-  int thread_id = blockIdx.x;
-
-  /*
-    We make sure that the thread_id isn't too large, and then we
-    assign c = a + b using the index we calculated above.
-
-    The big picture is that each thread is responsible for adding one
-    element from a and one element from b. Each thread is able to run
-    in parallel, so we get speedup.
-   */
-  if (thread_id < N) {
-    c[thread_id] = a[thread_id] + b[thread_id];
+__global__ void add_stride(int *a, int *b, int *c, int elements_per_thread) {
+  int offset = blockIdx.x * blockDim.x * elements_per_thread + threadIdx.x;
+  for (int i = 0; i < elements_per_thread; ++i) {
+    c[offset + i * blockDim.x] = a[offset + i * blockDim.x] + b[offset + i * blockDim.x];
   }
 }
