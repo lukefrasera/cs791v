@@ -85,7 +85,6 @@ int main(int argc, char *const argv[]) {
   cudaEventCreate(&end);
   float elapsedTime;
 
-  printf("Elements: %d\n", N);
   if (cpu) {
     cudaEventRecord(start, 0);
     for (int i = 0; i < N; ++i) {
@@ -93,7 +92,7 @@ int main(int argc, char *const argv[]) {
     }
     cudaEventRecord(end, 0);
     cudaEventElapsedTime(&elapsedTime, start, end);
-    printf("Elapsed Sequenctial Time: %f\n", elapsedTime);
+    printf("%f\n", elapsedTime);
     return 0;
   }
 
@@ -126,8 +125,7 @@ int main(int argc, char *const argv[]) {
   // Check GPU values
   for (int i = 0; i < N; ++i) {
     if (c[i] != a[i] + b[i]) {
-      printf("Element: %d\n", i);
-      printf("Oh no! Something went wrong.\n");
+      printf("0\n");
 
       // clean up events - we should check for error codes here.
       cudaEventDestroy(start);
@@ -140,7 +138,7 @@ int main(int argc, char *const argv[]) {
     }
   }
 
-  printf("Your program took: %f ms.\n", elapsedTime);
+  printf("%f\n", elapsedTime);
 
   cudaEventDestroy(start);
   cudaEventDestroy(end);
