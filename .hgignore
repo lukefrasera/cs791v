@@ -1,5 +1,5 @@
 syntax: glob
-
+*.zip
 *.pdf
 *.pyc
 *.~
