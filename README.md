@@ -1,6 +1,6 @@
 #CS791v: GPU programming using CUDA
 
- `	Luke Fraser
+ 	`Luke Fraser
 	Copyright (C) 2015  Luke Fraser
 
 	This program is free software: you can redistribute it and/or modify
