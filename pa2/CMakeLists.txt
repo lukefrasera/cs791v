@@ -9,3 +9,9 @@ include_directories(
 #  src/add-experiment.cu
 #  src/add.cu
 #)
+
+cuda_add_executable(prefix
+  src/prefix_sum.cu
+  src/sum.cu
+  src/reduction_kernel.cu
+)
