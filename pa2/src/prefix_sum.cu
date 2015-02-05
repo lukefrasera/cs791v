@@ -24,10 +24,9 @@
 #include <math.h>
 
 #include "sum.h"
-#include "reduction.h"
 
 void CudaMallocErrorCheck(void** ptr, int size);
-void SequentialRecord(int N, float* a, cudaEvent_t &start, cudaEvent_t &end, float &elapsedTime);
+void SequentialRecord(int N, float* a);
 
 
 int main(int argc, char *const argv[]) {
@@ -81,7 +80,8 @@ int main(int argc, char *const argv[]) {
   float elapsedTime=0;
 
   if (cpu) {
-    SequentialRecord(N, data, start, end, elapsedTime);
+    // SequentialRecord(N, data);
+    SequentialRecord(N, data);
     return 0;
   }
 
@@ -91,26 +91,26 @@ int main(int argc, char *const argv[]) {
 
   // Create event timers
 
-  cudaEventRecord(start, 0);
 
   cudaMemcpy(dev_in, data, N * sizeof(float), cudaMemcpyHostToDevice);
   cudaMemcpy(dev_out, result, blocks * sizeof(float), cudaMemcpyHostToDevice);
 
+  cudaEventRecord(start, 0);
   // Perform Gpu Computation
   // prefix_sum<<<blocks, threads, N*sizeof(float)>>>(dev_b, dev_a, N);
   reduce<<<blocks, threads, threads*sizeof(float)>>>(dev_in, dev_out, N);
 
+  cudaEventRecord(end, 0);
   cudaMemcpy(result, dev_out, blocks * sizeof(float), cudaMemcpyDeviceToHost);
 
-  cudaEventRecord(end, 0);
   cudaEventSynchronize(end);
   cudaEventElapsedTime(&elapsedTime, start, end);
 
   // Check GPU values
-  printf("%f\n", elapsedTime);
-  for (int i = 0; i < blocks; ++i){
-    printf("elem[%d]: %f\n", i, result[i]);
-  }
+  printf("%f", elapsedTime);
+  // for (int i = 0; i < blocks; ++i){
+  //   printf("elem[%d]: %f\n", i, result[i]);
+  // }
 
   cudaEventDestroy(start);
   cudaEventDestroy(end);
@@ -128,13 +128,18 @@ void CudaMallocErrorCheck(void** ptr, int size) {
   }
 }
 
-void SequentialRecord(int N, float* a, cudaEvent_t &start, cudaEvent_t &end, float &elapsedTime) {
+void SequentialRecord(int N, float* a) {
+  cudaEvent_t start, end;
+  cudaEventCreate(&start);
+  cudaEventCreate(&end);
+  float elapsedTime =1;
+
   cudaEventRecord(start, 0);
   for (int i = 1; i < N; ++i) {
     a[i] += a[i-1];
   }
   cudaEventRecord(end, 0);
-  printf("Solution: %f\n", a[N-1]);
+  cudaEventSynchronize(end);
   cudaEventElapsedTime(&elapsedTime, start, end);
-  printf("Time: %f\n", elapsedTime);
+  printf("%f", elapsedTime);
 }
