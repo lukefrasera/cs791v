@@ -23,6 +23,8 @@
 #include <time.h>
 #include <math.h>
 
+#include "mandelbrot_gpu.h"
+
 void GetOptParam(int &threads, int &blocks, bool &cpu);
 void SequentialMadelbrot(/*image parameters*/);
 
@@ -68,7 +70,7 @@ void SequentialMadelbrot(/*image parameters*/) {
         Z_im = 2*Z_re*Z_im + c_im;
         Z_re = Z_re2 - Z_im2 + c_re;
       }
-      if(isInside) { putpixel(x, y); }
+      if(isInside) { printf("Hi Mandel\n"); }
     }
   }
 }

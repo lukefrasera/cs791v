@@ -1,4 +1,4 @@
-// "mandelbrot_gpu.h"
+// "mandelbrot_gpu.cu"
 //
 //  Copyright (c) Luke Fraser 2015
 //
@@ -16,8 +16,3 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with cs791vClass.  If not, see <http://www.gnu.org/licenses/>.
-#ifndef MANDELBROT_H_
-#define MANDELBROT_H_
-
-
-#endif // MANDELBROT_H_

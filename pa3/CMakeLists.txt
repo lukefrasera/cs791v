@@ -12,6 +12,5 @@ include_directories(
 
 cuda_add_executable(mandelbrot
   src/mandelbrot.cu
-  #src/sum.cu
-  #  src/reduction_kernel.cu
+  src/mendelbrot_gpu.cu
 )
