@@ -55,13 +55,11 @@ int main (int argc, char *const argv[]) {
     std::clock_t c_start = std::clock();
     SequentialMadelbrot(f_image, iter_image);
     std::clock_t c_end = std::clock();
-    printf("CPU Time(ms): %f\n", 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC);
+    printf("%f", 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC);
   } else {
     // GPU mandelbrot
     threads = 2000 / blocks;
     blocks = blocks*2000;
-    printf("Threads: %d\n", threads);
-    printf("Blocks: %d\n", blocks);
 
     ParallelMandelbrot(f_image, iter_image, threads, blocks);
   }
@@ -108,7 +106,7 @@ void ParallelMandelbrot(unsigned char* image, unsigned short int* iter_image, in
   cudaEventSynchronize(end);
   cudaEventElapsedTime(&elapsedTime, start, end);
 
-  printf("GPU Time(ms): %f\n", elapsedTime);
+  printf("%f", elapsedTime);
 
   cudaEventDestroy(start);
   cudaEventDestroy(end);

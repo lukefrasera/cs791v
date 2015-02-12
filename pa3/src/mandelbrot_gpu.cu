@@ -25,15 +25,16 @@ __global__ void Mandelbrot(unsigned char * image, ushort * iter, float MaxIm, fl
   unsigned int blockdim = blockDim.x;
   unsigned int index = blockid*blockdim + threadid;
   // Caluclate Cartiseian coordinates
-  unsigned int x = index / COLS; // this is funky
-  unsigned int y = index - x * COLS;
+  unsigned int x = index/COLS;
+  unsigned int y = index-x*COLS;
 
   float c_im = MaxIm - y*Im_factor;
   float c_re = MinRe + x*Re_factor;
   float Z_re = c_re, Z_im = c_im;
+  float Z_re2, Z_im2;
   bool isInside = true;
   for(unsigned n=0; n<ITER; ++n) {
-    float Z_re2 = Z_re*Z_re, Z_im2 = Z_im*Z_im;
+    Z_re2 = Z_re*Z_re, Z_im2 = Z_im*Z_im;
     if(Z_re2 + Z_im2 > 4) {
       isInside = false;
       iter[index] = n;
