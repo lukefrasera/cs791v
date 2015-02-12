@@ -26,7 +26,7 @@ Prefix summation is an important aspect of parallel programming. This property i
   \label{eq:associative}
 \end{split}
 \end{equation}
-Eq~\ref{eq:associative} shows an example of how this property can be used to allow multiple threads to operate on an array concurrently. As you can see each group of paranthesis could be broken up into a separate parallel process. This is how the GPU can take advantage of the parallelization of array summation.
+Eq~\ref{eq:associative} shows an example of how this property can be used to allow multiple threads to operate on an array concurrently. As you can see each group of parenthesis could be broken up into a separate parallel process. This is how the GPU can take advantage of the parallelization of array summation.
 
 \section{Implementation}
 A simple function called reduce was written to operate over arrays up to size 1024. This size constraint is due to the fact that the maximum allowed threads per block is 1024. It is possible to compute the prefix sum for larger arrays, but multiple blocks are needed and then the GPU must be called again to work on the second array and sum its contents. This becomes a recursive algorithm that involves several I/O operations between the GPU and HOST machine.

@@ -19,5 +19,6 @@
 #ifndef MANDELBROT_H_
 #define MANDELBROT_H_
 
+__global__ void Mandelbrot(unsigned char * image, ushort * iter);
 
 #endif // MANDELBROT_H_
