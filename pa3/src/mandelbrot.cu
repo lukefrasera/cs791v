@@ -91,19 +91,19 @@ void ParallelMandelbrot(unsigned char* image, unsigned short int* iter_image, in
   float Im_factor = (MaxIm-MinIm)/(COLS-1);
 
   unsigned char * dev_image;
-  ushort1 * dev_iter;
+  ushort * dev_iter;
 
   CudaMallocErrorCheck((void**) &dev_image, ROWS*COLS*sizeof(char));
-  CudaMallocErrorCheck((void**) &dev_iter, ROWS*COLS*sizeof(ushort1));
+  CudaMallocErrorCheck((void**) &dev_iter, ROWS*COLS*sizeof(ushort));
 
   cudaMemcpy(dev_image, image, ROWS*COLS*sizeof(char), cudaMemcpyHostToDevice);
-  cudaMemcpy(dev_iter, iter_image, ROWS*COLS*sizeof(ushort1), cudaMemcpyHostToDevice);
+  cudaMemcpy(dev_iter, iter_image, ROWS*COLS*sizeof(ushort), cudaMemcpyHostToDevice);
 
   cudaEventRecord(start, 0);
-  // GPU Program Here
+  Mandelbrot<<<blocks, threads>>>(dev_image, dev_iter, MaxIm, Im_factor, MinRe, Re_factor);
   cudaEventRecord(end, 0);
   cudaMemcpy(image, dev_image, ROWS*COLS*sizeof(char), cudaMemcpyDeviceToHost);
-  cudaMemcpy(iter_image, dev_iter, ROWS*COLS*sizeof(ushort1), cudaMemcpyDeviceToHost);
+  cudaMemcpy(iter_image, dev_iter, ROWS*COLS*sizeof(ushort), cudaMemcpyDeviceToHost);
 
   cudaEventSynchronize(end);
   cudaEventElapsedTime(&elapsedTime, start, end);
