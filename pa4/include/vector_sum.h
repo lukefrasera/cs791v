@@ -16,3 +16,7 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with cs791vClass.  If not, see <http://www.gnu.org/licenses/>.
+#ifndef VECTOR_SUM_H_
+#define VECTOR_SUM_H_
+__global__ void reduce(float *g_idata, float *g_odata, unsigned int n);
+#endif  // VECTOR_SUM_H_

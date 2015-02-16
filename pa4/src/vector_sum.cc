@@ -16,3 +16,31 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with cs791vClass.  If not, see <http://www.gnu.org/licenses/>.
+
+__global__ void reduce(float *g_idata, float *g_odata, unsigned int n) {
+  // Pointer to shared memory
+  extern __shared__ float share_mem[];
+  unsigned int thread_id = threadIdx.x;
+  unsigned int offset = blockIdx.x*blockDim.x*2 + threadIdx.x;
+
+  // Temp result float
+  float result = (offset < n) ? g_idata[offset] : 0;
+
+  // Perform summation
+  if (offset + blockDim.x < n)
+    result += g_idata[offset+blockDim.x];
+  share_mem[thread_id] = result;
+  // Sync Threads in a single Block
+  __syncthreads();
+  
+  // store result to shared memory
+  for (unsigned int s=blockDim.x/2; s>0; s>>=1) {
+    if (thread_id < s) {
+      share_mem[thread_id] = result = result + share_mem[thread_id + s];
+    }
+    __syncthreads();
+  }
+
+  // Store result to output data pointer
+  if (thread_id == 0) g_odata[blockIdx.x] = result;
+}
