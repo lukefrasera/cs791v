@@ -98,14 +98,20 @@ void VectorSumGPU(float * src, uint32 threads, unint32 blocks,
 
   cudaEventRecord(start, 0);
   cudaMemcpy(dev_src, src, N*sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(dev_dest, dest, result_size_pad*sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(dev_dest, dest, result_size_pad*sizeof(float),
+      cudaMemcpyHostToDevice);
 
   // GPU function Call
+  Reduce<<<blocks, threads, /*Shared memory*/>>>(dev_src, dev_dest, N, result_size_pad);
   // Recall GPU function: Assumption Destination is power of 2. calculate block
   //                      and threads for each call.
   uint32 src_size = result_size_pad;
   // GPU Call loop until Threshold
   while (src_size > thresh) {
+    float * temp = dev_src;
+    dev_src = dev_dest;
+    dev_dest = temp;
+    
     if (src_size > 2048) {
       blocks = src_size / 2048;
       threads = 1024;
