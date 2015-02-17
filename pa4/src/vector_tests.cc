@@ -36,6 +36,7 @@ void VectorSumGPU(float * src, uint32 threads, unint32 blocks,
     uint32 thresh, uint32 N);
 uint32 NearestPowerTwo(uint32 N);
 ////////////////////////////////////////////////////////////////////////////////
+// Main Loop
 ////////////////////////////////////////////////////////////////////////////////
 int main (int argc, char *const argv[]) {
   unsigned int threads, blocks, type, thresh, N;
@@ -65,12 +66,19 @@ int main (int argc, char *const argv[]) {
     std::clock_t c_end = std::clock();
     printf("CPU Time(ms): %f", 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC);
   } else if (type == 1) { // GPU Vector Addition: CPU kernel recall
+    VectorSumGPU(src, threads, blocks, thresh, N);
   } else if (type == 2) { // GPU Vector Addition: GPU kernel recall
-  } else if (type == 3) { // GPU Vector Addition: Finish On CPU
+    VectorSumGPURecall(src, threads, blocks, thresh, N);
+  } else {
+    printf("Error: Not a valid type\n");
+    delete [] src;
+    exit(1);
   }
   return 0;
 }
+
 ////////////////////////////////////////////////////////////////////////////////
+// Other Utility and Base Functions
 ////////////////////////////////////////////////////////////////////////////////
 
 void VectorSumCPU(float * src, uint32 N) {
@@ -128,6 +136,12 @@ void VectorSumGPU(float * src, uint32 threads, unint32 blocks,
     VectorSumCPU(dest, src_size);
   }
   cudaEventRecord(end, 0);
+  cudaEventSynchronize(end);
+  cudaEventElapsedTime(&elapsedTime, start, end);
+  cudaEventDestroy(start);
+  cudaEventDestroy(end);
+  cudaFree(dev_src);
+  cudaFree(dev_dest);
 }
 
 void ParallelMandelbrot(unsigned char* image, unsigned short int* iter_image, int threads, int blocks) {

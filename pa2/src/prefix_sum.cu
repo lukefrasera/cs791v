@@ -106,8 +106,11 @@ int main(int argc, char *const argv[]) {
   cudaEventSynchronize(end);
   cudaEventElapsedTime(&elapsedTime, start, end);
 
+  for (int i = 1; i < blocks; ++i) {
+    result[i] += result[i-1];
+  }
   // Check GPU values
-  printf("%f", elapsedTime);
+  printf("%f: Sol: %f\n", elapsedTime, result[blocks-1]);
   // for (int i = 0; i < blocks; ++i){
   //   printf("elem[%d]: %f\n", i, result[i]);
   // }

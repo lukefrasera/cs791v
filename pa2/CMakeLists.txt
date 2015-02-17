@@ -13,5 +13,5 @@ include_directories(
 cuda_add_executable(prefix
   src/prefix_sum.cu
   src/sum.cu
-  src/reduction_kernel.cu
+#  src/reduction_kernel.cu
 )
