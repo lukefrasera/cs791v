@@ -23,60 +23,112 @@
 #include <time.h>
 #include <math.h>
 #include <ctime>
-#include "opencv2/opencv.hpp"
 
 #include "vector_sum.h"
 
-#define ROWS 2000
-#define COLS 2000
+typedef unsigned int uint32;
 
 void CudaMallocErrorCheck(void** ptr, int size);
-void GetOptParam(int argc, char *const argv[], int &threads, int &blocks, bool &cpu);
-void SequentialMadelbrot(unsigned char* image, unsigned short int* iter_image);
-void ParallelMandelbrot(unsigned char* image, unsigned short int* iter_image, int threads, int blocks);
-
+void GetOptParam(int argc, char *const argv[], uint32 &threads, uint32 &blocks,
+    uint32 thresh, uint32 N, bool &block_thread_dependent);
+void VectorSumCPU(float * src, uint32 N);
+void VectorSumGPU(float * src, uint32 threads, unint32 blocks,
+    uint32 thresh, uint32 N);
+uint32 NearestPowerTwo(uint32 N);
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 int main (int argc, char *const argv[]) {
-  unsigned int threads, blocks, type, thresh;
+  unsigned int threads, blocks, type, thresh, N;
+  bool block_thread_dependent = false;
+  float *src, *dest;
   // Get Operating Paramters
+  GetOptParam(argc, argv, threads, blocks, thresh, N, block_thread_dependent);
 
-  if (type == 0) {
-    // CPU Vector Addition
-    std::clock_t c_start = std::clock();
-    SequentialMadelbrot(f_image, iter_image);
-    std::clock_t c_end = std::clock();
-    printf("%f", 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC);
-  } else if (type == 1) {
-    // GPU Vector Addition
-    ParallelMandelbrot(f_image, iter_image, threads, blocks);
-  } else if (type == 2) {
-    // GPU 
+  // Allocate Vector
+  uint32 size = N;
+  if (block_thread_dependent) {
+    size = 1;
+    while (size < N) {size <<= 1;}
+    if (size <= 1024) {
+      blocks = 1;
+      threads = size;
+    } else {
+      blocks = size / 1024;
+      threads = 1024;
+    }
   }
-
-  // copy image to opencv type
-  cv::Mat image(cv::Size(2000,2000), CV_8UC1, f_image);
-  // save image
-  cv::imwrite("mandelbrot.png", image);
-  delete [] f_image;
-  delete [] iter_image;
+  SetupVector(&src, N, size);
+  // Perform Vector addition
+  if (type == 0) { // CPU Vector Addition
+    std::clock_t c_start = std::clock();
+    VectorSumCPU(src, N);
+    std::clock_t c_end = std::clock();
+    printf("CPU Time(ms): %f", 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC);
+  } else if (type == 1) { // GPU Vector Addition: CPU kernel recall
+  } else if (type == 2) { // GPU Vector Addition: GPU kernel recall
+  } else if (type == 3) { // GPU Vector Addition: Finish On CPU
+  }
   return 0;
 }
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
+
+void VectorSumCPU(float * src, uint32 N) {
+  for (int i = 1; i < N; ++i) {
+     src[i] += src[i-1];
+  }
+}
+
+void VectorSumGPU(float * src, uint32 threads, unint32 blocks,
+    uint32 thresh, uint32 N) {
+  // Setup Timing
+  cudaEvent_t start, end;
+  float elapsedTime=0;
+  cudaEventCreate(&start);
+  cudaEventCreate(&end);
+
+  // Allocate Memory
+  float *dev_src, *dev_dest;
+  CudaMallocErrorCheck((void**) &dev_src, N*sizeof(float));
+  uint32 result_size = round((float) N / (float) threads);
+  uint32 result_size_pad = NearestPowerTwo(result_size);
+  float * dest;
+  SetupVectorZero(&dest, result_size_pad);
+  CudaMallocErrorCheck((void**) &dev_dest, result_size_pad);
+
+  cudaEventRecord(start, 0);
+  cudaMemcpy(dev_src, src, N*sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(dev_dest, dest, result_size_pad*sizeof(float), cudaMemcpyHostToDevice);
+
+  // GPU function Call
+  // Recall GPU function: Assumption Destination is power of 2. calculate block
+  //                      and threads for each call.
+  uint32 src_size = result_size_pad;
+  // GPU Call loop until Threshold
+  while (src_size > thresh) {
+    if (src_size > 2048) {
+      blocks = src_size / 2048;
+      threads = 1024;
+    } else {
+      blocks = 1;
+      threads = src_size / 2;
+    }
+    ReducePowerTwo<<<blocks, threads, /*shared mem size*/>>>(dev_src, dev_dest, N);
+    src_size = blocks;
+  }
+  cudaMemcpy(dest, dev_dest, src_size*sizeof(float), cudaMemcpyDeviceToHost);
+  // Finish on CPU or Done
+  if (thresh > 1) {
+    VectorSumCPU(dest, src_size);
+  }
+  cudaEventRecord(end, 0);
+}
 
 void ParallelMandelbrot(unsigned char* image, unsigned short int* iter_image, int threads, int blocks) {
   cudaEvent_t start, end;
   cudaEventCreate(&start);
   cudaEventCreate(&end);
   float elapsedTime=0;
-
-  float MinRe = -2.0;
-  float MaxRe = 1.0;
-  float MinIm = -1.2;
-  float MaxIm = MinIm+(MaxRe-MinRe)*COLS/ROWS;
-  float Re_factor = (MaxRe-MinRe)/(ROWS-1);
-  float Im_factor = (MaxIm-MinIm)/(COLS-1);
 
   unsigned char * dev_image;
   ushort * dev_iter;
