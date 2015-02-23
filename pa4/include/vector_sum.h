@@ -19,4 +19,5 @@
 #ifndef VECTOR_SUM_H_
 #define VECTOR_SUM_H_
 __global__ void reduce(float *g_idata, float *g_odata, unsigned int n);
+__global__ void reduce_fix(float *g_idata, float *g_odata, unsigned int n, unsigned int s_size, unsigned int loops);
 #endif  // VECTOR_SUM_H_

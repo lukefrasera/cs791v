@@ -16,6 +16,7 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with cs791vClass.  If not, see <http://www.gnu.org/licenses/>.
+#include <stdio.h>
 
 __global__ void reduce(float *g_idata, float *g_odata, unsigned int n) {
   // Pointer to shared memory
@@ -45,4 +46,40 @@ __global__ void reduce(float *g_idata, float *g_odata, unsigned int n) {
 
   // Store result to output data pointer
   if (thread_id == 0) g_odata[block_id] = result;
+}
+
+__global__ void reduce_fix(float *g_idata, float *g_odata, unsigned int n, unsigned int s_size, unsigned int loops) {
+  // Pointer to shared memory
+  extern __shared__ float share_mem[];
+  unsigned int thread_id = threadIdx.x;
+  for (int i = 0; i < loops; ++i) {
+    unsigned int offset = blockIdx.x*blockDim.x*2 + threadIdx.x + blockDim.x * 2 * gridDim.x * i;
+
+    // Temp result float
+    float result = (offset < n) ? g_idata[offset] : 0;
+
+    // Perform summation
+    if (offset + blockDim.x < n)
+      result += g_idata[offset+blockDim.x];
+    share_mem[thread_id] = result;
+    // Sync Threads in a single Block
+    int delta = s_size - blockDim.x;
+    if (thread_id + delta > blockDim.x-1) {
+      share_mem[thread_id+delta] = 0;
+    }
+    __syncthreads();
+    
+    // store result to shared memory
+    for (unsigned int s=s_size/2; s>0; s>>=1) {
+      if (thread_id < s) {
+        share_mem[thread_id] = result = result + share_mem[thread_id + s];
+      }
+      __syncthreads();
+    }
+
+    // Store result to output data pointer
+    if (thread_id == 0) {
+      g_odata[blockIdx.x+ gridDim.x*i] = result;
+    }
+  }
 }
