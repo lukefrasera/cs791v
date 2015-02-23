@@ -30,6 +30,7 @@ typedef unsigned int uint32;
 void CudaMallocErrorCheck(void** ptr, int size);
 void SequentialRecord(int N, float* a);
 uint32 NearestPowerTwo(uint32 N);
+uint32 NearestPowerBase(uint32 N, uint32 base, uint32 &power);
 
 
 int main(int argc, char *const argv[]) {
@@ -67,9 +68,14 @@ int main(int argc, char *const argv[]) {
   // Allocate adding vectors
   float *data, *result;
   float *dev_in, *dev_out;
-
-  data = new float[N];
-  result = new float[blocks];
+  uint32 loops;
+  uint32 N_multiple = NearestPowerBase(N, threads * blocks * 2, loops);
+  int dev_result_size = NearestPowerTwo(blocks*loops);
+  data = new float[N_multiple];
+  memset(data, 0, N_multiple*sizeof(float));
+  result = new float[dev_result_size];
+  memset(result, 0, dev_result_size*sizeof(float));
+  
 
   // Fill host arrays
   for (int i = 0; i < N; ++i) {
@@ -89,32 +95,32 @@ int main(int argc, char *const argv[]) {
   }
 
   // Allocate Cuda memory
-  CudaMallocErrorCheck( (void**) &dev_in, N * sizeof(float));
-  CudaMallocErrorCheck( (void**) &dev_out, blocks * sizeof(float));
+  CudaMallocErrorCheck( (void**) &dev_in, N_multiple * sizeof(float));
+  CudaMallocErrorCheck( (void**) &dev_out, dev_result_size * sizeof(float));
 
   // Create event timers
 
 
-  cudaMemcpy(dev_in, data, N * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(dev_out, result, blocks * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(dev_in, data, N_multiple * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(dev_out, result, dev_result_size * sizeof(float), cudaMemcpyHostToDevice);
 
   cudaEventRecord(start, 0);
   // Perform Gpu Computation
   // prefix_sum<<<blocks, threads, N*sizeof(float)>>>(dev_b, dev_a, N);
   int share = NearestPowerTwo(threads);
-  reduce_fix<<<blocks, threads, share*sizeof(float)>>>(dev_in, dev_out, N, share);
+  reduce_fix<<<blocks, threads, share*sizeof(float)>>>(dev_in, dev_out, N_multiple, share, loops);
 
   cudaEventRecord(end, 0);
-  cudaMemcpy(result, dev_out, blocks * sizeof(float), cudaMemcpyDeviceToHost);
+  cudaMemcpy(result, dev_out, dev_result_size * sizeof(float), cudaMemcpyDeviceToHost);
 
   cudaEventSynchronize(end);
   cudaEventElapsedTime(&elapsedTime, start, end);
 
-  for (int i = 1; i < blocks; ++i) {
+  for (int i = 1; i < dev_result_size; ++i) {
     result[i] += result[i-1];
   }
   // Check GPU values
-  printf("%f: Sol: %f\n", elapsedTime, result[blocks-1]);
+  printf("%f: Sol: %f\n", elapsedTime, result[dev_result_size-1]);
   // for (int i = 0; i < blocks; ++i){
   //   printf("elem[%d]: %f\n", i, result[i]);
   // }
@@ -131,6 +137,16 @@ uint32 NearestPowerTwo(uint32 N) {
   uint32 result = 1;
   while (result < N) {
     result <<= 1;
+  }
+  return result;
+}
+
+uint32 NearestPowerBase(uint32 N, uint32 base, uint32 &power) {
+  uint32 result = base;
+  power = 1;
+  while (result < N) {
+    result += base;
+    power++;
   }
   return result;
 }
