@@ -25,8 +25,11 @@
 
 #include "sum.h"
 
+typedef unsigned int uint32;
+
 void CudaMallocErrorCheck(void** ptr, int size);
 void SequentialRecord(int N, float* a);
+uint32 NearestPowerTwo(uint32 N);
 
 
 int main(int argc, char *const argv[]) {
@@ -98,7 +101,8 @@ int main(int argc, char *const argv[]) {
   cudaEventRecord(start, 0);
   // Perform Gpu Computation
   // prefix_sum<<<blocks, threads, N*sizeof(float)>>>(dev_b, dev_a, N);
-  reduce<<<blocks, threads, threads*sizeof(float)>>>(dev_in, dev_out, N);
+  int share = NearestPowerTwo(threads);
+  reduce_fix<<<blocks, threads, share*sizeof(float)>>>(dev_in, dev_out, N, share);
 
   cudaEventRecord(end, 0);
   cudaMemcpy(result, dev_out, blocks * sizeof(float), cudaMemcpyDeviceToHost);
@@ -121,6 +125,14 @@ int main(int argc, char *const argv[]) {
   cudaFree(dev_out);
 
   return 0;
+}
+
+uint32 NearestPowerTwo(uint32 N) {
+  uint32 result = 1;
+  while (result < N) {
+    result <<= 1;
+  }
+  return result;
 }
 
 void CudaMallocErrorCheck(void** ptr, int size) {
