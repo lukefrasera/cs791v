@@ -21,6 +21,14 @@ def ImportCSVFile(filename):
         header = row
   return result, header
 
+def IndexChangeList(data):
+  prev_number = data[0]
+  N_indexs = []
+  for i, number in enumerate(data):
+    if number != prev_number:
+      N_indexs.append(i)
+    prev_number = number
+  return N_indexs
 def main(argv):
   raw_data, header = ImportCSVFile(argv[1])
   data = np.array(raw_data) 
@@ -31,8 +39,12 @@ def main(argv):
   threads = data[:,4].astype(int)
   samples = data[:,5]
 
-
-
+  N_index = IndexChangeList(N)
+  V_index = IndexChangeList(version)
+  T_index = IndexChangeList(threshold)
+  print N_index
+  print V_index
+  print T_index
 
 
 if __name__ == '__main__':
