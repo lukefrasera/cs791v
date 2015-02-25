@@ -97,7 +97,6 @@ void VectorSumGPU(float * src, uint32 threads, uint32 blocks,
   // Allocate Memory
   float *dev_src, *dev_dest;
   uint32 dev_dest_size = NearestPowerTwo(blocks*loops);
-
   CudaMallocErrorCheck((void**) &dev_src, N*sizeof(float));
   float * dest;
   SetupVectorZero(dest, dev_dest_size);
@@ -159,7 +158,49 @@ void VectorSumGPU(float * src, uint32 threads, uint32 blocks,
 
 void VectorSumGPURecall(float * src, uint32 threads, uint32 blocks,
     uint32 thresh, uint32 N, uint32 loops) {
+  // Setup Timing
+  cudaEvent_t start, end;
+  float elapsedTime=0;
+  cudaEventCreate(&start);
+  cudaEventCreate(&end);
 
+  // Allocate Memory
+  float *dev_src, *dev_dest;
+  uint32 dev_dest_size = NearestPowerTwo(blocks*loops);
+
+  CudaMallocErrorCheck((void**) &dev_src, N*sizeof(float));
+  float * dest;
+  SetupVectorZero(dest, dev_dest_size);
+  CudaMallocErrorCheck((void**) &dev_dest, dev_dest_size*sizeof(float));
+
+  cudaEventRecord(start, 0);
+  cudaMemcpy(dev_src, src, N*sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(dev_dest, dest, dev_dest_size*sizeof(float),
+      cudaMemcpyHostToDevice);
+
+  // GPU function Call
+  uint32 share = NearestPowerTwo(threads);
+  reduce_fix_recall<<<blocks, threads, share*sizeof(float)>>>(dev_src, dev_dest, N,
+      share, loops, thresh);
+
+  dev_dest_size = NearestPowerTwo(thresh);
+  dev_dest_size >>= 1;
+  cudaMemcpy(dest, dev_dest, dev_dest_size*sizeof(float),
+    cudaMemcpyDeviceToHost);
+  // Finish on CPU or Done
+  if (thresh > 1) {
+    VectorSumCPU(dest, dev_dest_size);
+  }
+  cudaEventRecord(end, 0);
+  cudaEventSynchronize(end);
+  cudaEventElapsedTime(&elapsedTime, start, end);
+
+  printf("Time(ms): %f Result: %f\n", elapsedTime, dest[dev_dest_size-1]);
+  cudaEventDestroy(start);
+  cudaEventDestroy(end);
+  cudaFree(dev_src);
+  cudaFree(dev_dest);
+  delete [] dest;
 }
 
 void GetOptParam(int argc, char *const argv[], uint32 &threads, uint32 &blocks,
