@@ -24,7 +24,7 @@
 #include <math.h>
 #include <ctime>
 
-#include "vector_sum.h"
+#include "../include/vector_sum.h"
 
 typedef unsigned int uint32;
 
@@ -62,7 +62,7 @@ int main (int argc, char *const argv[]) {
     std::clock_t c_start = std::clock();
     VectorSumCPU(src, N);
     std::clock_t c_end = std::clock();
-    printf("CPU Time(ms): %f", 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC);
+    printf("%f", 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC);
   } else if (type == 1) { // GPU Vector Addition: CPU kernel recall
     VectorSumGPU(src, threads, blocks, thresh, n_multiple, loops);
   } else if (type == 2) { // GPU Vector Addition: GPU kernel recall
@@ -148,7 +148,7 @@ void VectorSumGPU(float * src, uint32 threads, uint32 blocks,
   cudaEventSynchronize(end);
   cudaEventElapsedTime(&elapsedTime, start, end);
 
-  printf("Time(ms): %f Result: %f\n", elapsedTime, dest[dev_dest_size-1]);
+  printf("%f", elapsedTime);
   cudaEventDestroy(start);
   cudaEventDestroy(end);
   cudaFree(dev_src);
@@ -184,7 +184,9 @@ void VectorSumGPURecall(float * src, uint32 threads, uint32 blocks,
       share, loops, thresh);
 
   dev_dest_size = NearestPowerTwo(thresh);
-  dev_dest_size >>= 1;
+  if (dev_dest_size > thresh) {
+    dev_dest_size >>= 1;
+  }
   cudaMemcpy(dest, dev_dest, dev_dest_size*sizeof(float),
     cudaMemcpyDeviceToHost);
   // Finish on CPU or Done
@@ -194,8 +196,7 @@ void VectorSumGPURecall(float * src, uint32 threads, uint32 blocks,
   cudaEventRecord(end, 0);
   cudaEventSynchronize(end);
   cudaEventElapsedTime(&elapsedTime, start, end);
-
-  printf("Time(ms): %f Result: %f\n", elapsedTime, dest[dev_dest_size-1]);
+  printf("%f", elapsedTime);
   cudaEventDestroy(start);
   cudaEventDestroy(end);
   cudaFree(dev_src);

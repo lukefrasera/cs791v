@@ -16,6 +16,7 @@
 //
 //    You should have received a copy of the GNU General Public License
 //    along with cs791vClass.  If not, see <http://www.gnu.org/licenses/>.
+#include "../include/vector_sum.h"
 #include <stdio.h>
 
 __global__ void reduce(float *g_idata, float *g_odata, unsigned int n) {
@@ -80,7 +81,6 @@ __global__ void reduce_fix(float *g_idata, float *g_odata, unsigned int n, unsig
     // Store result to output data pointer
     if (thread_id == 0) {
       g_odata[blockIdx.x+ gridDim.x*i] = result;
-      printf("result:%f\n", result);
     }
   }
 }
