@@ -87,3 +87,7 @@ docs/_build/
 
 # PyBuilder
 target/
+
+*.aux
+*.log
+*.backup
