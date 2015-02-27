@@ -362,7 +362,7 @@ The overall method used to compute a full reduction was dependent on several par
   \item \textbf{Blocks}: The number of blocks used for calculating the first reduction.
   \item \textbf{Threads}: the number of threads used for calculating the first reduction.
 \end{itemize}
-The first reduction step performed by the GPU always uses Algorithms~\ref{alg:mod2} design. This allows the initial reduction to take an arbitrary vector size as well as arbitrary blocks and threads. The output vector from the first reduction is guaranteed to a power of 2 and all subsequent reduction can be performed by the simpler Algorithm~\ref{alg:original}.
+The first reduction step performed by the GPU always uses Algorithms~\ref{alg:mod2} design. This allows the initial reduction to take an arbitrary vector size as well as arbitrary blocks and threads. The output vector from the first reduction is guaranteed to a power of 2 and all subsequent reduction can be performed by the simpler Algorithm~\ref{alg:original}. This prevents algorithm~\ref{alg:mod2} from slowing the process down by much.
 
 
 \begin{algorithm}
@@ -432,6 +432,38 @@ The first reduction step performed by the GPU always uses Algorithms~\ref{alg:mo
   \end{algorithmic}
 \end{algorithm}
 
+\section{Results}
+To get sufficient data the program was ran with several parameters switches over time. 
+\begin{itemize}
+  \item \textbf{N} - varied from 2048 - 100,000,000 elements
+  \item \textbf{Threshold} - varied from 1 - 8192 elements
+  \item \textbf{Version} - varied from 1 - 2
+  \item \textbf{Samples} - Each process was ran 5 times and the run-times were averaged
+\end{itemize}
+
+This led to an over abundance of data points to analyze. It produced a CSV file with roughly 25,345 rows with every possible variation of ever parameter. It was apparent early on that the GPU Recall based algorithms were very unstable and would fail for large values of N. If the kernel had to self recurse too many times than the system would crash and the GPU wouldn't report a solution. This effect can be seen in figure~\ref{fig:error}.
+
+The run-time data for the CPU vs. GPU recall, as seen in table~\ref{tab:best}
+
+\begin{table}
+{%
+\newcommand{\mc}[3]{\multicolumn{#1}{#2}{#3}}
+\begin{center}
+\begin{tabular}[t]{|l|lll}\hline
+\mc{4}{|c|}{Best Results}\\\hline
+N & \mc{1}{l|}{CPU RECALL} & \mc{1}{l|}{GPU RECALL} & \mc{1}{l|}{Speed-up}\\\hline
+\mc{1}{|r|}{2048} & \mc{1}{r|}{0.0418304} & \mc{1}{r|}{0.0408192} & \mc{1}{r|}{1.024772656}\\\hline
+\mc{1}{|r|}{8192} & \mc{1}{r|}{0.0519552} & \mc{1}{r|}{0.0503296} & \mc{1}{r|}{1.032299084}\\\hline
+\mc{1}{|r|}{262144} & \mc{1}{r|}{0.3347328} & \mc{1}{r|}{0.3425152} & \mc{1}{r|}{0.9772786726}\\\hline
+\mc{1}{|r|}{524288} & \mc{1}{r|}{0.5480384} & \mc{1}{r|}{0.5567296} & \mc{1}{r|}{0.9843888308}\\\hline
+\mc{1}{|r|}{1048576} & \mc{1}{r|}{0.884032} & \mc{1}{r|}{0.8959488} & \mc{1}{r|}{0.98669924}\\\hline
+\mc{1}{|r|}{10000000} & \mc{1}{r|}{6.2174528} & \mc{1}{r|}{6.2613952} & \mc{1}{r|}{0.9929820114}\\\hline
+\end{tabular}
+\end{center}
+}%
+\caption{Fastest run-times recorded for each vector size.}
+\label{tab:best}
+\end{table}
 %\begin{figure}[!t]
 %\centering
 %\includegraphics[width=2.5in]{myfigure}
@@ -499,22 +531,6 @@ The first reduction step performed by the GPU always uses Algorithms~\ref{alg:mo
 %\end{tabular}
 %\end{table}
 
-\section{Results}
-{%
-\newcommand{\mc}[3]{\multicolumn{#1}{#2}{#3}}
-\begin{center}
-\begin{tabular}[t]{|l|lll}\hline
-\mc{4}{|c|}{Best Results}\\\hline
-N & \mc{1}{l|}{CPU RECALL} & \mc{1}{l|}{GPU RECALL} & \mc{1}{l|}{Speed-up}\\\hline
-\mc{1}{|r|}{2048} & \mc{1}{r|}{0.0418304} & \mc{1}{r|}{0.0408192} & \mc{1}{r|}{1.024772656}\\\hline
-\mc{1}{|r|}{8192} & \mc{1}{r|}{0.0519552} & \mc{1}{r|}{0.0503296} & \mc{1}{r|}{1.032299084}\\\hline
-\mc{1}{|r|}{262144} & \mc{1}{r|}{0.3347328} & \mc{1}{r|}{0.3425152} & \mc{1}{r|}{0.9772786726}\\\hline
-\mc{1}{|r|}{524288} & \mc{1}{r|}{0.5480384} & \mc{1}{r|}{0.5567296} & \mc{1}{r|}{0.9843888308}\\\hline
-\mc{1}{|r|}{1048576} & \mc{1}{r|}{0.884032} & \mc{1}{r|}{0.8959488} & \mc{1}{r|}{0.98669924}\\\hline
-\mc{1}{|r|}{10000000} & \mc{1}{r|}{6.2174528} & \mc{1}{r|}{6.2613952} & \mc{1}{r|}{0.9929820114}\\\hline
-\end{tabular}
-\end{center}
-}%
 
 \section{Conclusion}
 The conclusion goes here.
