@@ -63,26 +63,7 @@ def ExtractDataRange(n_index, v_index, t_index, N, version, thresh):
     raise ExtractError("Error: Version index Doesn't exist")
   return t_range
 
-def main(argv):
-  try:
-    raw_data, header = ImportCSVFile(argv[1])
-  except IndexError:
-    print "Error: You must provide a 'csv' file to load"
-    sys.exit(0)
-  data = np.array(raw_data) 
-  N = data[:,0].astype(int)
-  version = data[:,1].astype(int)
-  threshold = data[:,2].astype(int)
-  blocks = data[:,3].astype(int)
-  threads = data[:,4].astype(int)
-  samples = data[:,5]
-
-  N_index = IndexChangeList(N)
-  V_index = IndexChangeList(version)
-  T_index = IndexChangeList(threshold)
-  index_range = ExtractDataRange(N_index, V_index, T_index, 1048576, 1, 1)
-
-  
+def PlotGraph(index_range, blocks, threads, samples):
   sub_threads = []
   sub_blocks = []
   sub_samples = []
@@ -123,25 +104,57 @@ def main(argv):
   X = np.array(sub_threads)
   Y = np.array(sub_blocks)
   # Z = np.array(np.log1p(sub_samples))
-  Z = np.array(sub_samples)
-  print Z
+  Z = np.log1p(np.array(sub_samples))
+  return X, Y, Z
+def main(argv):
+  try:
+    raw_data, header = ImportCSVFile(argv[1])
+  except IndexError:
+    print "Error: You must provide a 'csv' file to load"
+    sys.exit(0)
+  data = np.array(raw_data) 
+  N = data[:,0].astype(int)
+  version = data[:,1].astype(int)
+  threshold = data[:,2].astype(int)
+  blocks = data[:,3].astype(int)
+  threads = data[:,4].astype(int)
+  samples = data[:,5]
 
-  fig = plt.figure()
-  ax = fig.gca(projection='3d')
-  surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm,
-          linewidth=0, antialiased=True)
-  # ax.set_zlim(-1.01, 1.01)
-  ax.set_xlabel('Threads')
-  ax.set_xlim(1, 1024)
-  ax.set_ylabel('Blocks')
-  ax.set_ylim(1, 32768)
-  ax.set_zlabel('Execution Time(ms)')
-  # ax.zaxis.set_major_locator(LinearLocator(10))
-  # ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+  N_index = IndexChangeList(N)
+  V_index = IndexChangeList(version)
+  T_index = IndexChangeList(threshold)
 
-  fig.colorbar(surf, shrink=0.5, aspect=10)
+  N_values=[262144, 524288, 10000000]
+  V_values=[1, 2]
+  Z_values=[1, 4096, 8192]
 
-  plt.show()
+  # N_values=[262144]
+  # V_values=[1]
+  # Z_values=[1]
+  for i in N_values:
+    for j in V_values:
+      for k in Z_values:
+        index_range = ExtractDataRange(N_index, V_index, T_index, i, j, k)
+
+        X, Y, Z = PlotGraph(index_range, blocks, threads, samples)
+
+        fig = plt.figure(dpi=160)
+        ax = fig.gca(projection='3d')
+        surf = ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.coolwarm,
+                linewidth=0, antialiased=True)
+        # ax.set_zlim(-1.01, 1.01)
+        ax.set_xlabel('Threads')
+        ax.set_xlim(1, 1024)
+        ax.set_ylabel('Blocks')
+        ax.set_ylim(1, 32768)
+        ax.set_zlabel('Execution Time(ms)')
+        # ax.zaxis.set_major_locator(LinearLocator(10))
+        # ax.zaxis.set_major_formatter(FormatStrFormatter('%.02f'))
+
+        fig.colorbar(surf, shrink=0.5, aspect=10)
+
+        plt.title("Execution Time(N: {0} Version: {1} Threshold: {2}".format(i, j, k))
+        plt.show()
 
 
 if __name__ == '__main__':

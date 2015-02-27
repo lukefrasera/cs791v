@@ -318,7 +318,10 @@ In order to allow for a variable number of threads to be assigned to the kernel 
 
 Algorithm~\ref{alg:mod1} still has limitations regarding dependency on the number of blocks and threads used based on the size of the input vector. This poses a problem that doesn't have such a simple solution.
 \subsection{Kernel Mod 2: Variable Blocks}
-The important factor that allows the kernels to function is that the vector size is equal to $blocks*threads$. To overcome this constraint each kernel needed the capability to restart if there are not enough blocks available to compute the vector addition. Algorithm~\ref{alg:mod2} shows the working 
+The important factor that allows the kernels to function is that the vector size is equal to $blocks*threads$. To overcome this constraint each kernel needed the capability to restart if there are not enough blocks available to compute the vector addition. Algorithm~\ref{alg:mod2} shows the final working kernel that can accept a vector that is simply a multiple of the number of blocks and threads. Meaning $N/(blocks*threads)$. This allows for a surface to be built from any size of threads and blocks. The vector passed to the kernel is simply padded with zeros up to a multiple of threads and blocks.
+
+\subsection{GPU: Recursion}
+Two more kernels were written to handle vector reduction in a recursive fashion. The key being that the instead of recalling the kernel to reduce again from the host machine the kernel function itself would recall another \emph{\_\_global\_\_} function to start the process over again.
 
 \begin{algorithm}
   \caption{Original Block and Thread Dependant Kernel}
@@ -350,6 +353,17 @@ The important factor that allows the kernels to function is that the vector size
     \ENDIF
   \end{algorithmic}
 \end{algorithm}
+\subsection{Method}
+The overall method used to compute a full reduction was dependent on several parameters past to program at runtime. Five variables were used as parameters to select between different runtime specifications:
+\begin{itemize}
+  \item \textbf{Version}: Algorithm version to use either GPU or CPU recall.
+  \item \textbf{N}: The size of the input vector.
+  \item \textbf{Threshold}: The vector size at which the CPU would take control back from the GPU to finish the summation.
+  \item \textbf{Blocks}: The number of blocks used for calculating the first reduction.
+  \item \textbf{Threads}: the number of threads used for calculating the first reduction.
+\end{itemize}
+The first reduction step performed by the GPU always uses Algorithms~\ref{alg:mod2} design. This allows the initial reduction to take an arbitrary vector size as well as arbitrary blocks and threads. The output vector from the first reduction is guaranteed to a power of 2 and all subsequent reduction can be performed by the simpler Algorithm~\ref{alg:original}.
+
 
 \begin{algorithm}
   \caption{Mod 1 Thread Independent Kernel}
@@ -382,6 +396,42 @@ The important factor that allows the kernels to function is that the vector size
     \ENDIF
   \end{algorithmic}
 \end{algorithm}
+
+\begin{algorithm}
+  \caption{Mod 2 Independent Kernel}
+  \label{alg:mod2}
+  \begin{algorithmic}
+    \REQUIRE $N=2*B*T$,~ $T=2^n$
+    \STATE $B \Leftarrow BlockId$
+    \STATE $T \Leftarrow ThreadId$
+    \STATE $D \Leftarrow BlockDim$
+    \STATE $N \Leftarrow Vector Size$
+    
+    \FOR{$i=0$ to $loops$}
+    \STATE $Offset \Leftarrow B * D * 2 + T$
+    \STATE $result \Leftarrow Vector[offset]$
+    \STATE $shareSize \Leftarrow nearest\_power\_2\_greater(T)$
+    
+    \IF{$Offset + D < N$}
+        \STATE $result \Leftarrow result + Vector[Offset + D]$
+    \ENDIF
+    \STATE $share \Leftarrow T$
+    \STATE syncthreads
+    
+    \FOR{$s=D/2$ to $0$} 
+    \STATE $s >>= 1$ each iteration
+        \IF{$T < s$}
+            \STATE $share[T] \Leftarrow result \Leftarrow result + share[T + s]$
+        \ENDIF
+        \STATE syncthreads
+    \ENDFOR
+    \IF{$T == 0$} 
+      \STATE OUTPUT = $result$
+    \ENDIF
+    \ENDFOR
+  \end{algorithmic}
+\end{algorithm}
+
 %\begin{figure}[!t]
 %\centering
 %\includegraphics[width=2.5in]{myfigure}
@@ -449,6 +499,23 @@ The important factor that allows the kernels to function is that the vector size
 %\end{tabular}
 %\end{table}
 
+\section{Results}
+{%
+\newcommand{\mc}[3]{\multicolumn{#1}{#2}{#3}}
+\begin{center}
+\begin{tabular}[t]{|l|lll}\hline
+\mc{4}{|c|}{Best Results}\\\hline
+N & \mc{1}{l|}{CPU RECALL} & \mc{1}{l|}{GPU RECALL} & \mc{1}{l|}{Speed-up}\\\hline
+\mc{1}{|r|}{2048} & \mc{1}{r|}{0.0418304} & \mc{1}{r|}{0.0408192} & \mc{1}{r|}{1.024772656}\\\hline
+\mc{1}{|r|}{8192} & \mc{1}{r|}{0.0519552} & \mc{1}{r|}{0.0503296} & \mc{1}{r|}{1.032299084}\\\hline
+\mc{1}{|r|}{262144} & \mc{1}{r|}{0.3347328} & \mc{1}{r|}{0.3425152} & \mc{1}{r|}{0.9772786726}\\\hline
+\mc{1}{|r|}{524288} & \mc{1}{r|}{0.5480384} & \mc{1}{r|}{0.5567296} & \mc{1}{r|}{0.9843888308}\\\hline
+\mc{1}{|r|}{1048576} & \mc{1}{r|}{0.884032} & \mc{1}{r|}{0.8959488} & \mc{1}{r|}{0.98669924}\\\hline
+\mc{1}{|r|}{10000000} & \mc{1}{r|}{6.2174528} & \mc{1}{r|}{6.2613952} & \mc{1}{r|}{0.9929820114}\\\hline
+\end{tabular}
+\end{center}
+}%
+
 \section{Conclusion}
 The conclusion goes here.
 
@@ -456,18 +523,6 @@ The conclusion goes here.
 
 
 % conference papers do not normally have an appendix
-
-
-% use section* for acknowledgment
-\section*{Acknowledgment}
-
-
-The authors would like to thank...
-
-
-
-
-
 % trigger a \newpage just before the given reference
 % number - used to balance the columns on the last page
 % adjust value as needed - may need to be readjusted if
