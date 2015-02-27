@@ -314,8 +314,12 @@ The original kernel needed to be augmented in order to handle the new constraint
 The original kernel was augmented to achieve the new requirements of the programming assignment. The final implementation featured two new versions of the algorithm. One version that was recalled by the CPU and another that was recalled by itself. Algorithm~\ref{alg:original} shows the original implementation of the vector addition. Algorithm~\ref{alg:original} implementation was limited mainly by the shared memory size and warp wise reduction step. This is evident in the \emph{FOR loop} where $s$ is bit shifted at each iteration. By doing so half the number of threads are used for addition at each iteration. With this step a single solution for each block is obtained. This produces a resulting sum vector the size of the number of blocks.
 
 \subsection{Kernel Mod 1: Variable Threads}
-In order to allow for a variable number of threads to be assigned to the kernel the \emph{FOR loop} needed to be adjusted to handle a number of threads that isn't necessarily a power of 2. Algorithm~\ref{alg:original}
+In order to allow for a variable number of threads to be assigned to the kernel the \emph{FOR loop} needed to be adjusted to handle a number of threads that isn't necessarily a power of 2. Algorithm~\ref{alg:original} shows the modified code that is capable of running with an arbitrary number of threads per block. This is a minimal fix and does not alter the code very much from its original state. The major change is in the use of shared memory. As long as the shared memory is a power of 2 then the algorithm can funtion as it should regardless of the thread size. This is an important thing to notice. Because share memory will be the nearest power of 2 larger than the thread size the thread size will at least be half as large as the share space making it still possible to perform the reduction.
+
+Algorithm~\ref{alg:mod1} still has limitations regarding dependency on the number of blocks and threads used based on the size of the input vector. This poses a problem that doesn't have such a simple solution.
 \subsection{Kernel Mod 2: Variable Blocks}
+The important factor that allows the kernels to function is that the vector size is equal to $blocks*threads$. To overcome this constraint each kernel needed the capability to restart if there are not enough blocks available to compute the vector addition. Algorithm~\ref{alg:mod2} shows the working 
+
 \begin{algorithm}
   \caption{Original Block and Thread Dependant Kernel}
   \label{alg:original}
@@ -349,7 +353,7 @@ In order to allow for a variable number of threads to be assigned to the kernel 
 
 \begin{algorithm}
   \caption{Mod 1 Thread Independent Kernel}
-  \label{alg:original}
+  \label{alg:mod1}
   \begin{algorithmic}
     \REQUIRE $N=2*B*T$,~ $T=2^n$
     \STATE $B \Leftarrow BlockId$
