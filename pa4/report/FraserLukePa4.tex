@@ -2,300 +2,44 @@
 % *** CITATION PACKAGES ***
 %
 %\usepackage{cite}
-% cite.sty was written by Donald Arseneau
-% V1.6 and later of IEEEtran pre-defines the format of the cite.sty package
-% \cite{} output to follow that of IEEE. Loading the cite package will
-% result in citation numbers being automatically sorted and properly
-% "compressed/ranged". e.g., [1], [9], [2], [7], [5], [6] without using
-% cite.sty will become [1], [2], [5]--[7], [9] using cite.sty. cite.sty's
-% \cite will automatically add leading space, if needed. Use cite.sty's
-% noadjust option (cite.sty V3.8 and later) if you want to turn this off
-% such as if a citation ever needs to be enclosed in parenthesis.
-% cite.sty is already installed on most LaTeX systems. Be sure and use
-% version 5.0 (2009-03-20) and later if using hyperref.sty.
-% The latest version can be obtained at:
-% http://www.ctan.org/tex-archive/macros/latex/contrib/cite/
-% The documentation is contained in the cite.sty file itself.
 
-
-
-% *** GRAPHICS RELATED PACKAGES ***
-%
 \ifCLASSINFOpdf
-  % \usepackage[pdftex]{graphicx}
-  % declare the path(s) where your graphic files are
-  % \graphicspath{{../pdf/}{../jpeg/}}
-  % and their extensions so you won't have to specify these with
-  % every instance of \includegraphics
-  % \DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+  \usepackage[pdftex]{graphicx}
 \else
-  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
-  % will default to the driver specified in the system graphics.cfg if no
-  % driver is specified.
-  % \usepackage[dvips]{graphicx}
-  % declare the path(s) where your graphic files are
-  % \graphicspath{{../eps/}}
-  % and their extensions so you won't have to specify these with
-  % every instance of \includegraphics
-  % \DeclareGraphicsExtensions{.eps}
+  \usepackage[dvips]{graphicx}
 \fi
-% graphicx was written by David Carlisle and Sebastian Rahtz. It is
-% required if you want graphics, photos, etc. graphicx.sty is already
-% installed on most LaTeX systems. The latest version and documentation
-% can be obtained at: 
-% http://www.ctan.org/tex-archive/macros/latex/required/graphics/
-% Another good source of documentation is "Using Imported Graphics in
-% LaTeX2e" by Keith Reckdahl which can be found at:
-% http://www.ctan.org/tex-archive/info/epslatex/
-%
-% latex, and pdflatex in dvi mode, support graphics in encapsulated
-% postscript (.eps) format. pdflatex in pdf mode supports graphics
-% in .pdf, .jpeg, .png and .mps (metapost) formats. Users should ensure
-% that all non-photo figures use a vector format (.eps, .pdf, .mps) and
-% not a bitmapped formats (.jpeg, .png). IEEE frowns on bitmapped formats
-% which can result in "jaggedy"/blurry rendering of lines and letters as
-% well as large increases in file sizes.
-%
-% You can find documentation about the pdfTeX application at:
-% http://www.tug.org/applications/pdftex
 
-
-
-
-
-% *** MATH PACKAGES ***
-%
 \usepackage[cmex10]{amsmath}
-% A popular package from the American Mathematical Society that provides
-% many useful and powerful commands for dealing with mathematics. If using
-% it, be sure to load this package with the cmex10 option to ensure that
-% only type 1 fonts will utilized at all point sizes. Without this option,
-% it is possible that some math symbols, particularly those within
-% footnotes, will be rendered in bitmap form which will result in a
-% document that can not be IEEE Xplore compliant!
-%
-% Also, note that the amsmath package sets \interdisplaylinepenalty to 10000
-% thus preventing page breaks from occurring within multiline equations. Use:
-%\interdisplaylinepenalty=2500
-% after loading amsmath to restore such page breaks as IEEEtran.cls normally
-% does. amsmath.sty is already installed on most LaTeX systems. The latest
-% version and documentation can be obtained at:
-% http://www.ctan.org/tex-archive/macros/latex/required/amslatex/math/
-
-
-
-
-
-% *** SPECIALIZED LIST PACKAGES ***
-%
 \usepackage{algorithmic}
 \usepackage{algorithm}
-% algorithmic.sty was written by Peter Williams and Rogerio Brito.
-% This package provides an algorithmic environment fo describing algorithms.
-% You can use the algorithmic environment in-text or within a figure
-% environment to provide for a floating algorithm. Do NOT use the algorithm
-% floating environment provided by algorithm.sty (by the same authors) or
-% algorithm2e.sty (by Christophe Fiorio) as IEEE does not use dedicated
-% algorithm float types and packages that provide these will not provide
-% correct IEEE style captions. The latest version and documentation of
-% algorithmic.sty can be obtained at:
-% http://www.ctan.org/tex-archive/macros/latex/contrib/algorithms/
-% There is also a support site at:
-% http://algorithms.berlios.de/index.html
-% Also of interest may be the (relatively newer and more customizable)
-% algorithmicx.sty package by Szasz Janos:
-% http://www.ctan.org/tex-archive/macros/latex/contrib/algorithmicx/
-
-
-
-
-% *** ALIGNMENT PACKAGES ***
-%
 \usepackage{array}
-% Frank Mittelbach's and David Carlisle's array.sty patches and improves
-% the standard LaTeX2e array and tabular environments to provide better
-% appearance and additional user controls. As the default LaTeX2e table
-% generation code is lacking to the point of almost being broken with
-% respect to the quality of the end results, all users are strongly
-% advised to use an enhanced (at the very least that provided by array.sty)
-% set of table tools. array.sty is already installed on most systems. The
-% latest version and documentation can be obtained at:
-% http://www.ctan.org/tex-archive/macros/latex/required/tools/
 
-
-% IEEEtran contains the IEEEeqnarray family of commands that can be used to
-% generate multiline equations as well as matrices, tables, etc., of high
-% quality.
-
-
-
-
-% *** SUBFIGURE PACKAGES ***
 \ifCLASSOPTIONcompsoc
   \usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
 \else
   \usepackage[caption=false,font=footnotesize]{subfig}
 \fi
-% subfig.sty, written by Steven Douglas Cochran, is the modern replacement
-% for subfigure.sty, the latter of which is no longer maintained and is
-% incompatible with some LaTeX packages including fixltx2e. However,
-% subfig.sty requires and automatically loads Axel Sommerfeldt's caption.sty
-% which will override IEEEtran.cls' handling of captions and this will result
-% in non-IEEE style figure/table captions. To prevent this problem, be sure
-% and invoke subfig.sty's "caption=false" package option (available since
-% subfig.sty version 1.3, 2005/06/28) as this is will preserve IEEEtran.cls
-% handling of captions.
-% Note that the Computer Society format requires a larger sans serif font
-% than the serif footnote size font used in traditional IEEE formatting
-% and thus the need to invoke different subfig.sty package options depending
-% on whether compsoc mode has been enabled.
-%
-% The latest version and documentation of subfig.sty can be obtained at:
-% http://www.ctan.org/tex-archive/macros/latex/contrib/subfig/
-
-
-
-
-% *** FLOAT PACKAGES ***
-%
 \usepackage{fixltx2e}
-% fixltx2e, the successor to the earlier fix2col.sty, was written by
-% Frank Mittelbach and David Carlisle. This package corrects a few problems
-% in the LaTeX2e kernel, the most notable of which is that in current
-% LaTeX2e releases, the ordering of single and double column floats is not
-% guaranteed to be preserved. Thus, an unpatched LaTeX2e can allow a
-% single column figure to be placed prior to an earlier double column
-% figure. The latest version and documentation can be found at:
-% http://www.ctan.org/tex-archive/macros/latex/base/
-
-
 \usepackage{stfloats}
-% stfloats.sty was written by Sigitas Tolusis. This package gives LaTeX2e
-% the ability to do double column floats at the bottom of the page as well
-% as the top. (e.g., "\begin{figure*}[!b]" is not normally possible in
-% LaTeX2e). It also provides a command:
-%\fnbelowfloat
-% to enable the placement of footnotes below bottom floats (the standard
-% LaTeX2e kernel puts them above bottom floats). This is an invasive package
-% which rewrites many portions of the LaTeX2e float routines. It may not work
-% with other packages that modify the LaTeX2e float routines. The latest
-% version and documentation can be obtained at:
-% http://www.ctan.org/tex-archive/macros/latex/contrib/sttools/
-% Do not use the stfloats baselinefloat ability as IEEE does not allow
-% \baselineskip to stretch. Authors submitting work to the IEEE should note
-% that IEEE rarely uses double column equations and that authors should try
-% to avoid such use. Do not be tempted to use the cuted.sty or midfloat.sty
-% packages (also by Sigitas Tolusis) as IEEE does not format its papers in
-% such ways.
-% Do not attempt to use stfloats with fixltx2e as they are incompatible.
-% Instead, use Morten Hogholm'a dblfloatfix which combines the features
-% of both fixltx2e and stfloats:
-%
-% \usepackage{dblfloatfix}
-% The latest version can be found at:
-% http://www.ctan.org/tex-archive/macros/latex/contrib/dblfloatfix/
-
-
-
-
-% *** PDF, URL AND HYPERLINK PACKAGES ***
-%
 \usepackage{url}
-% url.sty was written by Donald Arseneau. It provides better support for
-% handling and breaking URLs. url.sty is already installed on most LaTeX
-% systems. The latest version and documentation can be obtained at:
-% http://www.ctan.org/tex-archive/macros/latex/contrib/url/
-% Basically, \url{my_url_here}.
-
-
-
-
-% *** Do not adjust lengths that control margins, column widths, etc. ***
-% *** Do not use packages that alter fonts (such as pslatex).         ***
-% There should be no need to do such things with IEEEtran.cls V1.6 and later.
-% (Unless specifically asked to do so by the journal or conference you plan
-% to submit to, of course. )
-
-
 % correct bad hyphenation here
 \hyphenation{op-tical net-works semi-conduc-tor}
 
-
 \begin{document}
-%
-% paper title
-% Titles are generally capitalized except for words such as a, an, and, as,
-% at, but, by, for, in, nor, of, on, or, the, to and up, which are usually
-% not capitalized unless they are the first or last word of the title.
-% Linebreaks \\ can be used within to get better formatting as desired.
-% Do not put math or special symbols in the title.
 \title{Programming Assignment 4: Vector Addition \\ Continued}
 
-
-% author names and affiliations
-% use a multiple column layout for up to three different
-% affiliations
 \author{\IEEEauthorblockN{Luke Fraser}
 \IEEEauthorblockA{Computer Science Department\\
 University of Nevada, Reno\\
 Email: Luke.Fraser.A@gmail.com}}
 
-% conference papers do not typically use \thanks and this command
-% is locked out in conference mode. If really needed, such as for
-% the acknowledgment of grants, issue a \IEEEoverridecommandlockouts
-% after \documentclass
-
-% for over three affiliations, or if they all won't fit within the width
-% of the page, use this alternative format:
-% 
-%\author{\IEEEauthorblockN{Michael Shell\IEEEauthorrefmark{1},
-%Homer Simpson\IEEEauthorrefmark{2},
-%James Kirk\IEEEauthorrefmark{3}, 
-%Montgomery Scott\IEEEauthorrefmark{3} and
-%Eldon Tyrell\IEEEauthorrefmark{4}}
-%\IEEEauthorblockA{\IEEEauthorrefmark{1}School of Electrical and Computer Engineering\\
-%Georgia Institute of Technology,
-%Atlanta, Georgia 30332--0250\\ Email: see http://www.michaelshell.org/contact.html}
-%\IEEEauthorblockA{\IEEEauthorrefmark{2}Twentieth Century Fox, Springfield, USA\\
-%Email: homer@thesimpsons.com}
-%\IEEEauthorblockA{\IEEEauthorrefmark{3}Starfleet Academy, San Francisco, California 96678-2391\\
-%Telephone: (800) 555--1212, Fax: (888) 555--1212}
-%\IEEEauthorblockA{\IEEEauthorrefmark{4}Tyrell Inc., 123 Replicant Street, Los Angeles, California 90210--4321}}
-
-
-
-
-% use for special paper notices
-%\IEEEspecialpapernotice{(Invited Paper)}
-
-
-
-
-% make the title area
 \maketitle
 
-% As a general rule, do not put math, special symbols or citations
-% in the abstract
 \begin{abstract}
 Vector addition is a simple problem in computing that is typically done in a sequential fashion. An N-sized vector array is summed up to compute it total sum. The sequential implementation is very slow when N gets large. As well this type of problem well suited for parallel execution. In this assignment vector addition is taken one step further by allowing arbitrary thread and block sizes as well as GPU recursive behavior and CPU hand-offs for when sequential outperforms parallel. This implementation was also tested more rigorously at different sizes of N.
 \end{abstract}
 
-% no keywords
-
-
-
-
-% For peer review papers, you can put extra information on the cover
-% page as needed:
-% \ifCLASSOPTIONpeerreview
-% \begin{center} \bfseries EDICS Category: 3-BBND \end{center}
-% \fi
-%
-% For peerreview papers, this IEEEtran command inserts a page break and
-% creates the second title. It will be ignored for other modes.
 \IEEEpeerreviewmaketitle
-
-
 
 \section{Introduction}
 The previous assignment had far less strict guidelines on the vector addition implementation. The product that was produced was a kernel function that operated on even numbered sizes of N. As well the block and thread sizes were dependent on the size of N to an extant. Being that they had to multiply to $N/2$.
@@ -441,39 +185,82 @@ To get sufficient data the program was ran with several parameters switches over
   \item \textbf{Samples} - Each process was ran 5 times and the run-times were averaged
 \end{itemize}
 
-This led to an over abundance of data points to analyze. It produced a CSV file with roughly 25,345 rows with every possible variation of ever parameter. It was apparent early on that the GPU Recall based algorithms were very unstable and would fail for large values of N. If the kernel had to self recurse too many times than the system would crash and the GPU wouldn't report a solution. This effect can be seen in figure~\ref{fig:error}.
+This led to an over abundance of data points to analyze. It produced a CSV file with roughly 25,345 rows with every possible variation of ever parameter. It was apparent early on that the GPU Recall based algorithms were very unstable and would fail for large values of N. If the kernel had to self recurse too many times than the system would crash and the GPU wouldn't report a solution. This effect can be seen in figure~\ref{fig:unstable}.
 
-The run-time data for the CPU vs. GPU recall, as seen in table~\ref{tab:best}
+The run-time data for the CPU vs. GPU recall, as seen in table~\ref{tab:best} shows that the recursive GPU kernel only outperforms the CPU recall kernel for low values of $N$. The CPU takes time for the kernel calls to reach the GPU which for small values of N and so the recursive call doesn't ahve the latency. However for large values of the N the kernel calls are able to queue before the computation finishes removing the advantage of the recursive call. As well the limitaions on the available function call depth make the recursive kernel vary unstable. When N is very large the function call stack overflows and the GPU faults.
 
+Performing recursive calls to the GPU isn't always the best and in many cases the fastest method would be to do the initial summation on the GPU followed by a sequential finish of the remaining output sums. The best method is dependent on the size of N(The number of elements in the array). As N becomes large the GPU's parallelization takes effect and drastic speedup are seen. Figure~\ref{fig:executeshort} shows how at small values of N the CPU outperforms the GPU. Considering the effects of I/O with the GPU the use of the GPU after the initial iteration of summation seems less beneficial over the CPU.
+
+It is clear from figure~\ref{fig:n524288v1} that performance based on blocks and threads is at its best when either or both the number of blocks or threads is low. When the number of blocks and threads increase there must be a lot more memory swapping due to the need to shared memory on each threads and block.
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=8.5cm]{speedup.png}      
+  \caption{GPU Speedup Graph.}
+  \label{fig:speedup}
+\end{figure}
+Overall the GPU outperforms the CPU when N is large and peaks at around a 15x performance increase over the CPU as seen in figure~\ref{fig:speedup}.
 \begin{table}
 {%
 \newcommand{\mc}[3]{\multicolumn{#1}{#2}{#3}}
 \begin{center}
 \begin{tabular}[t]{|l|lll}\hline
 \mc{4}{|c|}{Best Results}\\\hline
-N & \mc{1}{l|}{CPU RECALL} & \mc{1}{l|}{GPU RECALL} & \mc{1}{l|}{Speed-up}\\\hline
-\mc{1}{|r|}{2048} & \mc{1}{r|}{0.0418304} & \mc{1}{r|}{0.0408192} & \mc{1}{r|}{1.024772656}\\\hline
-\mc{1}{|r|}{8192} & \mc{1}{r|}{0.0519552} & \mc{1}{r|}{0.0503296} & \mc{1}{r|}{1.032299084}\\\hline
-\mc{1}{|r|}{262144} & \mc{1}{r|}{0.3347328} & \mc{1}{r|}{0.3425152} & \mc{1}{r|}{0.9772786726}\\\hline
-\mc{1}{|r|}{524288} & \mc{1}{r|}{0.5480384} & \mc{1}{r|}{0.5567296} & \mc{1}{r|}{0.9843888308}\\\hline
-\mc{1}{|r|}{1048576} & \mc{1}{r|}{0.884032} & \mc{1}{r|}{0.8959488} & \mc{1}{r|}{0.98669924}\\\hline
-\mc{1}{|r|}{10000000} & \mc{1}{r|}{6.2174528} & \mc{1}{r|}{6.2613952} & \mc{1}{r|}{0.9929820114}\\\hline
+N                         & \mc{1}{l|}{CPU RECALL}& \mc{1}{l|}{GPU RECALL}& \mc{1}{l|}{Speed-up}    \\\hline
+\mc{1}{|r|}{2048}         & \mc{1}{r|}{0.0418304} & \mc{1}{r|}{0.0408192} & \mc{1}{r|}{1.024772656} \\\hline
+\mc{1}{|r|}{8192}         & \mc{1}{r|}{0.0519552} & \mc{1}{r|}{0.0503296} & \mc{1}{r|}{1.032299084} \\\hline
+\mc{1}{|r|}{262144}       & \mc{1}{r|}{0.3347328} & \mc{1}{r|}{0.3425152} & \mc{1}{r|}{0.9772786726}\\\hline
+\mc{1}{|r|}{524288}       & \mc{1}{r|}{0.5480384} & \mc{1}{r|}{0.5567296} & \mc{1}{r|}{0.9843888308}\\\hline
+\mc{1}{|r|}{1048576}      & \mc{1}{r|}{0.884032}  & \mc{1}{r|}{0.8959488} & \mc{1}{r|}{0.98669924}  \\\hline
+\mc{1}{|r|}{10000000}     & \mc{1}{r|}{6.2174528} & \mc{1}{r|}{6.2613952} & \mc{1}{r|}{0.9929820114}\\\hline
 \end{tabular}
 \end{center}
 }%
 \caption{Fastest run-times recorded for each vector size.}
 \label{tab:best}
 \end{table}
-%\begin{figure}[!t]
-%\centering
-%\includegraphics[width=2.5in]{myfigure}
-% where an .eps filename suffix will be assumed under latex, 
-% and a .pdf suffix will be assumed for pdflatex; or what has been declared
-% via \DeclareGraphicsExtensions.
-%\caption{Simulation results for the network.}
-%\label{fig_sim}
-%\end{figure}
 
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=8.5cm]{figure_12.png}      
+  \caption{GPU Kernel Recall: Unstable calls result in a zero run-time.}
+  \label{fig:unstable}
+\end{figure}
+
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=8.5cm]{speeduprecall.png}      
+  \caption{GPU/CPU Recall Speedup Graph.}
+  \label{fig:recallspeedup}
+\end{figure}
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=8.5cm]{execution_time.png}      
+  \caption{GPU/CPU Execution time.}
+  \label{fig:execute}
+\end{figure}
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=8.5cm]{execution_time_short.png}      
+  \caption{GPU/CPU Execution time Short.}
+  \label{fig:executeshort}
+\end{figure}
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=8.5cm]{figure_10.png}      
+  \caption{GPU Execution time. N=100,000,000}
+  \label{fig:}
+\end{figure}
+
+\begin{figure}[!t]
+  \centering
+  \includegraphics[width=8.5cm]{figure_5.png}      
+  \caption{GPU Execution time. N=524,288}
+  \label{fig:n524288v1}
+\end{figure}
 
 % An example of a double column floating figure using two subfigures.
 % (The subfig.sty package must be loaded for this to work.)
@@ -531,42 +318,13 @@ N & \mc{1}{l|}{CPU RECALL} & \mc{1}{l|}{GPU RECALL} & \mc{1}{l|}{Speed-up}\\\hli
 %\end{tabular}
 %\end{table}
 
+% \section{Conclusion}
+% The conclusion goes here.
 
-\section{Conclusion}
-The conclusion goes here.
-
-
-
-
-% conference papers do not normally have an appendix
-% trigger a \newpage just before the given reference
-% number - used to balance the columns on the last page
-% adjust value as needed - may need to be readjusted if
-% the document is modified later
-%\IEEEtriggeratref{8}
-% The "triggered" command can be changed if desired:
-%\IEEEtriggercmd{\enlargethispage{-5in}}
-
-% references section
-
-% can use a bibliography generated by BibTeX as a .bbl file
-% BibTeX documentation can be easily obtained at:
-% http://www.ctan.org/tex-archive/biblio/bibtex/contrib/doc/
-% The IEEEtran BibTeX style support page is at:
-% http://www.michaelshell.org/tex/ieeetran/bibtex/
 \bibliographystyle{IEEEtran}
-% argument is your BibTeX string definitions and bibliography database(s)
 %\bibliography{IEEEabrv,../bib/paper}
-%
-% <OR> manually copy in the resultant .bbl file
-% set second argument of \begin to the number of references
-% (used to reserve space for the reference number labels box)
-
 %\bibliographystyle{plain}
 %\bibliography{IEEEabrv, references}
-
-
-% that's all folks
 \end{document}
 
 
